@@ -1,2 +1,6 @@
+How to mount a file to a container while running existing locally.
+
+# Create a file python.log locally
 vi python.log
+# Run this command
 docker run -d -v /home/python.log:/home/python.log manoharshetty507/course-website:v1
