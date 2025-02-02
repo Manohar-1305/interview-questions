@@ -1,0 +1,13 @@
+6. tf.state file got corrupted,how do I recover?
+
+mv terraform.tfstate.backup terraform.tfstate
+
+terraform refresh
+
+jq . terraform.tfstate
+
+terraform state pull > new_state.tfstate
+
+mv new_state.tfstate terraform.tfstate
+
+terraform state list
