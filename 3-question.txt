@@ -1,0 +1,2 @@
+vi python.log
+docker run -d -v /home/python.log:/home/python.log manoharshetty507/course-website:v1
