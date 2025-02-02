@@ -1,5 +1,4 @@
-How do we write multi-stage Dockerfile
-Why do we need it?
+4. How do we write multi-stage Dockerfile? Why do we need it?
 
 Multi-stage builds allow you to have a clean, lean, and efficient image, focusing only on what's necessary for the runtime environment while maintaining flexibility for complex builds.
 
