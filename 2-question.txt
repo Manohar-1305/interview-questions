@@ -1,7 +1,36 @@
-sudo docker run -d -p 5000:5000 manoharshetty507/course-website:v1
-docker commit container_id or <docker-account-id>/course-website:v5
+2. I want to keep Dockerfile static but make some changes to the application. You should not make any changes in Dockerfile how do I make it. 
 
+vi Dockerfile.override
+# Use the original image as the base image
+FROM manoharshetty507/course-website:v1
 
-docker images
-docker login
-docker push <docker-account-id>/course-website:v5
+# Install Nginx
+RUN apt-get update && \
+    apt-get install -y nginx && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy your custom Nginx config (replace with your actual config file)
+COPY default.conf /etc/nginx/sites-available/default
+
+# Expose ports for both Flask and Nginx
+EXPOSE 5000 80
+
+# Start both Flask and Nginx
+CMD service nginx start && python /app/app.py
+
+- 
+vi default.conf
+
+server {
+    listen 80;
+
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+
+docker build -f Dockerfile.override -t updated_flask:latest .
+docker run -d -p 5000:5000 -p 80:80 --name flask-nginx-container updated_flask:latest
