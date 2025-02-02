@@ -1,4 +1,5 @@
-1. Create a New Dockerfile (Optional) with Extensions
+1. How can we make some changes in running container. Now, I want to create image out of a running container?
+
 vi Dockerfile.override
 # Use the original image as the base image
 FROM manoharshetty507/course-website:v1
