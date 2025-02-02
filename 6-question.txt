@@ -1,4 +1,4 @@
-6. tf.state file got corrupted,how do I recover?
+6. tf.state file got corrupted or removed ,how do I recover?
 
 mv terraform.tfstate.backup terraform.tfstate
 
