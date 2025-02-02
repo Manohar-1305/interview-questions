@@ -1,56 +1,42 @@
-provider "aws" {
-  region = "ap-south-1" # Correct region code for Asia South (Mumbai)
-}
+How do we write multi-stage Dockerfile
+Why do we need it?
 
-# Fetch the existing VPC by name
-data "aws_vpc" "selected_vpc" {
-  filter {
-    name   = "tag:Name"
-    values = ["<your-vpc-name"]
-  }
-}
+Multi-stage builds allow you to have a clean, lean, and efficient image, focusing only on what's necessary for the runtime environment while maintaining flexibility for complex builds.
 
-# Fetch the existing subnet by name
-data "aws_subnet" "selected_subnet" {
-  filter {
-    name   = "tag:Name"
-    values = ["<your-subnet-name"]
-  }
-  vpc_id = data.aws_vpc.selected_vpc.id
-}
+Make the image smaller: 
+You can use a big image (like one with all the build tools) in the first stage to build your app, then in the next stage, you only copy the finished result into a smaller, lighter image. This means your final image won't have unnecessary files and tools, keeping it small and fast.
 
-# Fetch the existing security group by name
-data "aws_security_group" "selected_sg" {
-  filter {
-    name   = "group-name"
-    values = ["your-security-group"]
-  }
-  vpc_id = data.aws_vpc.selected_vpc.id
-}
+Keep things clean:
+Multi-stage builds make it easier to organize and manage complex Dockerfiles. You can separate different steps, such as building dependencies, testing, and preparing the runtime environment, into logical stages, making your Dockerfile easier to understand and maintain.
 
+Speed up builds: 
+Docker can reuse parts of the build that haven’t changed, so it doesn’t have to rebuild everything every time. This makes future builds faster.
 
-# Kubernetes instance
-resource "aws_instance" "my_nodes" {
-  #  ami                    = "ami-0065b9f12202a6b98"
-  count         = 10
-  ami                    = "ami-03bb6d83c60fc5f7c"
-  instance_type          = "t2.medium"
-  key_name               = "testing-dev-1"
-  subnet_id              = data.aws_subnet.selected_subnet.id
-  vpc_security_group_ids = [data.aws_security_group.selected_sg.id]
-  user_data              = file("file.sh")
+In simple terms, multi-stage builds help you create smaller, cleaner, and faster images for your app.
 
-  tags = {
-    Name                               = "my_nodes"
-  }
-}
+Example
+----------
+FROM manoharshetty507/course-website:v1 AS builder
 
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-output "public_ips" {
-  value = aws_instance.my_nodes[*].public_ip
-}
+WORKDIR /app
 
-resource "local_file" "public_ips_file" {
-  content = join("\n", aws_instance.my_nodes[*].public_ip)
-  filename = "public_ips.txt"
-}
+COPY requirements.txt /app/
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Stage2
+FROM python:3.9-alpine
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+COPY --from=builder /app /app
+
+EXPOSE 5000
+
+CMD ["python", "app.py"]
