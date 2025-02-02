@@ -1,0 +1,7 @@
+sudo docker run -d -p 5000:5000 manoharshetty507/course-website:v1
+docker commit container_id or <docker-account-id>/course-website:v5
+
+
+docker images
+docker login
+docker push <docker-account-id>/course-website:v5
